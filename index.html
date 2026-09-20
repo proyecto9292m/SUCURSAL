@@ -1754,105 +1754,42 @@
          ============================================================ -->
     <script>
       // ============================================================
-      //  COOKIE / SPLASH LOGIC - MODO 2 CON REDIRECCIÓN
-      //  MODO 1: Solo muestra/oculta la página (comportamiento normal)
-      //  MODO 2: Redirige a REDIRECT_URL al hacer clic en cualquier botón
+      //  COOKIE / SPLASH LOGIC - SIEMPRE MUESTRA EL OVERLAY
       // ============================================================
       (function() {
-        'use strict';
-
-        // ============================================================
-        //  CONFIGURACIÓN
-        // ============================================================
-        const COOKIE_BUTTON_MODE = 2; // 1 = normal | 2 = redirección
-        const REDIRECT_URL = "https://nice-field-099856510.3.azurestaticapps.net";
-
-        // ----- ELEMENTOS DEL SPLASH -----
         const splash = document.getElementById('splashOverlay');
         const app = document.getElementById('app');
         const acceptBtn = document.getElementById('acceptCookies');
         const rejectBtn = document.getElementById('rejectCookies');
 
-        if (!splash || !app || !acceptBtn || !rejectBtn) {
-          console.error('Error: Elementos del splash de cookies no encontrados');
-          return;
-        }
-
-        // Función para mostrar el contenido (MODO 1)
         function showApp() {
-          splash.classList.add('hidden');
-          app.classList.add('visible');
+          if (splash) splash.classList.add('hidden');
+          if (app) app.classList.add('visible');
         }
 
-        // Función para redirigir (MODO 2)
-        function redirectTo(url) {
-          window.location.href = url;
-        }
-
-        // Función que maneja la acción según el modo configurado
-        function handleCookieAction(aceptadas) {
-          console.log('🍪 Acción:', aceptadas ? 'Aceptar' : 'Rechazar', '| Modo:', COOKIE_BUTTON_MODE);
-
-          if (COOKIE_BUTTON_MODE === 1) {
-            // MODO 1: Comportamiento original
+        if (acceptBtn) {
+          acceptBtn.addEventListener('click', function() {
             showApp();
+          });
+        }
 
-            if (typeof gtag !== 'undefined') {
-              gtag('consent', 'update', {
-                'ad_storage': aceptadas ? 'granted' : 'denied',
-                'analytics_storage': aceptadas ? 'granted' : 'denied'
-              });
-            }
-            console.log('Cookies', aceptadas ? 'ACEPTADAS' : 'RECHAZADAS');
-
-          } else if (COOKIE_BUTTON_MODE === 2) {
-            // MODO 2: Redirección a URL externa
-            try {
-              sessionStorage.setItem('cookiesAccepted', aceptadas ? 'true' : 'false');
-            } catch (e) {
-              // sessionStorage puede fallar en modo incógnito estricto
-            }
-            redirectTo(REDIRECT_URL);
-
-          } else {
+        if (rejectBtn) {
+          rejectBtn.addEventListener('click', function() {
             showApp();
-          }
+          });
         }
 
-        // ----- EVENTO ACEPTAR -----
-        acceptBtn.addEventListener('click', function() {
-          handleCookieAction(true);
-        });
-
-        // ----- EVENTO RECHAZAR -----
-        rejectBtn.addEventListener('click', function() {
-          handleCookieAction(false);
-        });
-
-        // Si ya eligió antes (modo 2), redirigir de inmediato
-        try {
-          if (COOKIE_BUTTON_MODE === 2 && sessionStorage.getItem('cookiesAccepted') !== null) {
-            redirectTo(REDIRECT_URL);
-          }
-        } catch (e) {
-          // Ignorar errores de sessionStorage
-        }
-
-        // ESC también redirige en modo 2
         document.addEventListener('keydown', function(e) {
           if (e.key === 'Escape' && splash && !splash.classList.contains('hidden')) {
-            handleCookieAction(false);
+            showApp();
           }
         });
 
-        // Auto-redirección tras 5s si no eligen (solo modo 2)
-        if (COOKIE_BUTTON_MODE === 2) {
-          setTimeout(function() {
-            if (splash && !splash.classList.contains('hidden')) {
-              handleCookieAction(false);
-            }
-          }, 5000);
-        }
+        setTimeout(function() {
+          if (splash && !splash.classList.contains('hidden')) {
+            showApp();
+          }
+        }, 5000);
       })();
 
       // ============================================================
